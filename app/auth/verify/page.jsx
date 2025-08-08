@@ -56,8 +56,9 @@ export default function VerifyPage() {
           <img src="/logo.svg" className="w-64" alt="Company Logo" />
         </Link>
       </div>
-      <div className="max-w-2xl">
-        <h2 className="font-bold text-center text-5xl">Verify OTP</h2>
+      <div className="max-w-3xl">
+        <h2 className="font-bold text-center text-4xl">Enter the code we just sent you</h2>
+        <p className="text-gray-600 mt-4 text-lg px-16 text-center">Please enter the 6-digit code we sent to your email address. This code will expire in 10 minutes.</p>
       </div>
       <div className="w-[500px]">
         <form onSubmit={handleSubmit} className="space-y-3">

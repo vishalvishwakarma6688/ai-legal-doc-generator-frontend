@@ -1,88 +1,18 @@
-// "use client";
-// import Link from "next/link";
-// import { usePathname, useRouter } from "next/navigation";
-// import { useEffect, useState } from "react";
-// import toast from "react-hot-toast";
-// import { publicRoutes } from "@/utils/publicRoutes";
-
-// export default function DashboardLayout({ children }) {
-//   const [activeTab, setActiveTab] = useState()
-//   const router = useRouter();
-//   const pathName = usePathname();
-
-//   useEffect(() => {
-//     const token =
-//     localStorage.getItem("token") || sessionStorage.getItem("token");
-//     const isPublic = publicRoutes.includes(pathName);
-//     if (!token && !isPublic) {
-//       toast.error("Please login first");
-//       router.replace("/auth/login");
-//     }
-//   }, [router, pathName]);
-
-//   const handleLogout = () => {
-//     localStorage.removeItem("token");
-//     sessionStorage.removeItem("token");
-//     toast.success("Logged out");
-//     router.replace("/auth/login");
-//   };
-
-//   return (
-//     <div className="min-h-screen flex bg-gray-100">
-//       <aside className="w-64 bg-gray-800 text-white flex flex-col p-4">
-//         <h1 className="text-2xl font-bold mb-6">AI Legal Docs</h1>
-//         <nav className="flex flex-col gap-4">
-//           <Link
-//             href="/dashboard"
-//             className="hover:bg-gray-700 px-3 py-2 rounded"
-//           >
-//             Dashboard
-//           </Link>
-//           <Link
-//             href="/documents/create"
-//             className="hover:bg-gray-700 px-3 py-2 rounded"
-//           >
-//             Create Document
-//           </Link>
-//           <Link
-//             href="/templates"
-//             className="hover:bg-gray-700 px-3 py-2 rounded"
-//           >
-//             Templates
-//           </Link>
-//           <Link href="/plans" className="hover:bg-gray-700 px-3 py-2 rounded">
-//             Upgrade Plan
-//           </Link>
-//         </nav>
-//         <button
-//           onClick={handleLogout}
-//           className="mt-auto bg-red-500 px-3 py-2 rounded hover:bg-red-600"
-//         >
-//           Logout
-//         </button>
-//       </aside>
-
-//       {/* Main Content */}
-//       <div className="flex-1 flex flex-col">
-//         <header className="bg-white shadow p-4 flex justify-between items-center">
-//           <h2 className="text-xl text-black font-semibold">Dashboard</h2>
-//         </header>
-//         <main className="flex-1 p-6">{children}</main>
-//       </div>
-//     </div>
-//   );
-// }
-
 "use client";
+
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
+import { clsx } from "clsx";
 import { publicRoutes } from "@/utils/publicRoutes";
+import ConfirmModal from "@/components/ConfirmModal";
 
 export default function DashboardLayout({ children }) {
   const router = useRouter();
   const pathName = usePathname();
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
+  const [user, setUser] = useState({});
 
   useEffect(() => {
     const token =
@@ -94,54 +24,128 @@ export default function DashboardLayout({ children }) {
     }
   }, [router, pathName]);
 
+  useEffect(() => {
+    let data =
+      typeof window !== "undefined"
+        ? JSON.parse(
+            localStorage.getItem("user") ||
+              sessionStorage.getItem("user") ||
+              null
+          )
+        : null;
+    setUser(data);
+  }, []);
+
   const handleLogout = () => {
+    setShowLogoutModal(true);
+  };
+
+  const confirmLogout = () => {
     localStorage.removeItem("token");
     sessionStorage.removeItem("token");
     toast.success("Logged out");
     router.replace("/auth/login");
+    setShowLogoutModal(false);
   };
 
-  const linkClasses = (path) =>
-    `px-3 py-2 rounded transition ${
-      pathName === path ? "bg-gray-700 font-semibold" : "hover:bg-gray-700"
-    }`;
+  const NavLink = ({ href, icon, label }) => {
+    const isActive = pathName === href;
+
+    return (
+      <Link
+        href={href}
+        className={clsx(
+          "flex items-center gap-4 px-3 py-4 rounded transition",
+          isActive ? "bg-gray-300 font-semibold" : "hover:bg-gray-200"
+        )}
+      >
+        <img src={icon} alt="" className="w-7 h-7" />
+        <span className="text-[13px]">{label}</span>
+      </Link>
+    );
+  };
 
   return (
-    <div className="min-h-screen flex bg-gray-100">
-      <aside className="w-64 bg-gray-800 text-white flex flex-col p-4">
-        <h1 className="text-2xl font-bold mb-6">AI Legal Docs</h1>
-        <nav className="flex flex-col gap-4">
-          <Link href="/dashboard" className={linkClasses("/dashboard")}>
-            Dashboard
-          </Link>
-          <Link
-            href="/documents/create"
-            className={linkClasses("/documents/create")}
-          >
-            Create Document
-          </Link>
-          <Link href="/templates" className={linkClasses("/templates")}>
-            Templates
-          </Link>
-          <Link href="/plans" className={linkClasses("/plans")}>
-            Upgrade Plan
-          </Link>
-        </nav>
-        <button
-          onClick={handleLogout}
-          className="mt-auto bg-red-500 px-3 cursor-pointer py-2 rounded hover:bg-red-600"
-        >
-          Logout
-        </button>
-      </aside>
+    <>
+      <div className="min-h-screen flex bg-gray-100">
+        <aside className="w-80 text-black shadow-xl flex flex-col p-11">
+          <div className="mb-8">
+            <Link href={"/dashboard"}>
+              <img src="/logo.svg" className="w-48" alt="Logo" />
+            </Link>
+          </div>
 
-      {/* Main Content */}
-      <div className="flex-1 flex flex-col">
-        <header className="bg-white shadow p-4 flex justify-between items-center">
-          <h2 className="text-xl text-black font-semibold">Dashboard</h2>
-        </header>
-        <main className="flex-1 p-6">{children}</main>
+          <nav className="flex flex-col gap-2">
+            <NavLink href="/dashboard" icon="/home.svg" label="Home" />
+            <NavLink
+              href="/documents/create"
+              icon="/new.svg"
+              label="Create Document"
+            />
+            <NavLink href="/templates" icon="/template.svg" label="Templates" />
+            <NavLink href="/plans" icon="/template.svg" label="Upgrade Plan" />
+            <NavLink href="/profile" icon="/template.svg" label="Profile" />
+            <NavLink href="/settings" icon="/setting.svg" label="Settings" />
+          </nav>
+
+          <button
+            onClick={handleLogout}
+            className="mt-auto bg-red-500 px-3 cursor-pointer py-2 rounded hover:bg-red-600 transition text-white"
+          >
+            Logout
+          </button>
+        </aside>
+
+        <div className="flex-1 flex flex-col">
+          <div className="p-10 flex flex-col gap-14">
+            <h2 className="text-black font-semibold text-5xl">
+              Welcome back {user?.name?.split(" ")[0] ?? "Guest"}
+            </h2>
+            <h3 className="text-black font-semibold text-3xl">
+              {pathName === "/dashboard"
+                ? "Get Started"
+                : pathName === "/documents/create"
+                ? "Create Document"
+                : pathName === "/templates"
+                ? "Your Templates"
+                : pathName === "/plans"
+                ? "Plans"
+                : pathName === "/profile"
+                ? "Profile"
+                : pathName === "/settings"
+                ? "Settings"
+                : ""}
+            </h3>
+            {pathName === "/dashboard" && (
+              <div className="flex gap-5">
+                <button
+                  onClick={() => router.push("/documents/create")}
+                  className="bg-blue-500 shadow-sm rounded-lg cursor-pointer text-white font-semibold py-3 px-4"
+                >
+                  New Document
+                </button>
+                <button
+                  onClick={() => router.push("/templates")}
+                  className="bg-gray-300 shadow-sm rounded-lg cursor-pointer text-black font-semibold py-3 px-4"
+                >
+                  Templates
+                </button>
+              </div>
+            )}
+          </div>
+
+          <main className="flex-1 p-10 py-1">{children}</main>
+        </div>
       </div>
-    </div>
+      {showLogoutModal && (
+        <ConfirmModal
+          isOpen={showLogoutModal}
+          title="Confirm Logout"
+          message="Are you sure you want to logout?"
+          onConfirm={confirmLogout}
+          onCancel={() => setShowLogoutModal(false)}
+        />
+      )}
+    </>
   );
 }
