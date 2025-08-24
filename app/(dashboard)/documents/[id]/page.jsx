@@ -4,6 +4,8 @@ import { useParams } from 'next/navigation';
 import { useState, useEffect } from 'react';
 import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
+import jsPDF from 'jspdf';
+import 'jspdf-autotable';
 
 export default function DocumentPage() {
   const { id } = useParams();
@@ -27,7 +29,7 @@ export default function DocumentPage() {
     if (data && editor) {
       setTitle(data.title);
       setContent(data.content);
-      editor.commands.setContent(data.content);
+      editor.commands.setContent(data.content, false);
     }
   }, [data, editor]);
 
@@ -36,6 +38,24 @@ export default function DocumentPage() {
   const handleSave = () => {
     updateDoc({ id, title, content });
   };
+
+  const handleDownloadPDF = () => {
+    const doc = new jsPDF();  
+    doc.setFontSize(18);
+    doc.text(title, 14, 20);
+    const html = editor.getHTML();
+    doc.html(html, {
+      x: 14,
+      y: 30,
+      width: 180, // mm
+      windowWidth: 800,
+      callback: function (doc) {
+        doc.save(`${title}.pdf`);
+      },
+    });
+  };
+  
+
 
   return (
     <div className="max-w-3xl mx-auto p-6 bg-white shadow rounded">
@@ -54,13 +74,21 @@ export default function DocumentPage() {
       )}
 
       {/* Save Button */}
-      <button
-        onClick={handleSave}
-        disabled={isPending}
-        className="bg-blue-600 text-white px-4 py-2 rounded"
-      >
-        {isPending ? 'Saving...' : 'Save'}
-      </button>
+      <div className='flex gap-5'>
+        <button
+          onClick={handleSave}
+          disabled={isPending}
+          className="bg-blue-600 text-white px-4 cursor-pointer py-2 rounded"
+        >
+          {isPending ? 'Saving...' : 'Save'}
+        </button>
+        <button
+          onClick={handleDownloadPDF}
+          className="bg-green-600 text-white px-4 cursor-pointer py-2 rounded"
+        >
+          Download PDF
+        </button>
+      </div>
     </div>
   );
 }

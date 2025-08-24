@@ -43,6 +43,8 @@ export default function DashboardLayout({ children }) {
   const confirmLogout = () => {
     localStorage.removeItem("token");
     sessionStorage.removeItem("token");
+    localStorage.removeItem("user");
+    sessionStorage.removeItem("user");
     toast.success("Logged out");
     router.replace("/auth/login");
     setShowLogoutModal(false);
@@ -68,7 +70,7 @@ export default function DashboardLayout({ children }) {
   return (
     <>
       <div className="min-h-screen flex bg-gray-100">
-        <aside className="w-80 text-black shadow-xl flex flex-col p-11">
+        <aside className="w-80 text-black shadow-xl flex flex-col p-11 h-screen overflow-hidden">
           <div className="mb-8">
             <Link href={"/dashboard"}>
               <img src="/logo.svg" className="w-48" alt="Logo" />
@@ -83,20 +85,20 @@ export default function DashboardLayout({ children }) {
               label="Create Document"
             />
             <NavLink href="/templates" icon="/template.svg" label="Templates" />
-            <NavLink href="/plans" icon="/template.svg" label="Upgrade Plan" />
+            <NavLink href="/plans" icon="/premium.svg" label="Upgrade Plan" />
             <NavLink href="/profile" icon="/template.svg" label="Profile" />
             <NavLink href="/settings" icon="/setting.svg" label="Settings" />
           </nav>
 
           <button
             onClick={handleLogout}
-            className="mt-auto bg-red-500 px-3 cursor-pointer py-2 rounded hover:bg-red-600 transition text-white"
+            className="mt-auto bg-red-500 px-3 cursor-pointer py-2 rounded-lg hover:bg-red-600 transition text-white"
           >
             Logout
           </button>
         </aside>
 
-        <div className="flex-1 flex flex-col">
+        <div className="flex-1 flex flex-col h-screen overflow-hidden">
           <div className="p-10 flex flex-col gap-14">
             <h2 className="text-black font-semibold text-5xl">
               Welcome back {user?.name?.split(" ")[0] ?? "Guest"}
@@ -133,8 +135,7 @@ export default function DashboardLayout({ children }) {
               </div>
             )}
           </div>
-
-          <main className="flex-1 p-10 py-1">{children}</main>
+          <main className="flex-1 p-10 py-1 pb-12 overflow-y-auto">{children}</main>
         </div>
       </div>
       {showLogoutModal && (

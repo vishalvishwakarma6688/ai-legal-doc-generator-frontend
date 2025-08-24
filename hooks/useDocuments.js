@@ -47,7 +47,7 @@ export const useDeleteDocument = () => {
     },
     onSuccess: () => {
       toast.success('Document deleted');
-      queryClient.invalidateQueries(['documents']); // Refresh documents list
+      queryClient.invalidateQueries(['documents']);
     },
     onError: () => {
       toast.error('Failed to delete document');
